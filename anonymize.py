@@ -380,24 +380,6 @@ class Anonymizer:
                 attempt += 1
             self.cache[category][key] = replacement
         return same_case(original, self.cache[category][key])
-        key = normalized(original)
-
-        if key not in self.cache[category]:
-            fake = self.fake(
-                category,
-                key,
-            )
-
-            self.cache[category][key] = getattr(
-                fake,
-                faker_method,
-            )()
-
-        return same_case(
-            original,
-            self.cache[category][key],
-        )
-
     def street(self, value):
         return self.component(
             "street",
