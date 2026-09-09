@@ -4,6 +4,8 @@ import re
 import secrets
 from collections import defaultdict
 from faker import Faker
+
+
 SKIP = {"venues.name"}
 SUFFIXES = ("Jr.", "Sr.", "II", "III", "IV")
 def read_string(text, start):
@@ -234,6 +236,7 @@ class Anonymizer:
                 "utf-8"
             )
         ).digest()
+
         seed = int.from_bytes(
             digest[:8],
             "big",
@@ -254,21 +257,16 @@ class Anonymizer:
                 ),
                 "",
             )
-            attempt = 0
-            while True:
-                fake = self.fake(
-                    "name",
-                    f"{key}|{attempt}",
-                )
-                value = (
-                    f"{fake.first_name()} "
-                    f"{fake.last_name()}"
-                )
-                if suffix:
-                    value += " " + suffix
-                if normalized(value) != key:
-                    break
-                attempt += 1
+            fake = self.fake(
+                "name",
+                key,
+            )
+            value = (
+                f"{fake.first_name()} "
+                f"{fake.last_name()}"
+            )
+            if suffix:
+                value += " " + suffix
             self.cache["name"][key] = value
         return same_case(
             original,
@@ -290,44 +288,38 @@ class Anonymizer:
                 ),
                 "",
             )
-            attempt = 0
-            while True:
-                fake = self.fake(
-                    "email",
-                    f"{key}|{attempt}",
+            fake = self.fake(
+                "email",
+                key,
+            )
+            first = re.sub(
+                r"\W",
+                "",
+                fake.first_name(),
+            ).lower()
+            last = re.sub(
+                r"\W",
+                "",
+                fake.last_name(),
+            ).lower()
+            if separator:
+                local = (
+                    first
+                    + separator
+                    + last
                 )
-                first = re.sub(
-                    r"\W",
-                    "",
-                    fake.first_name(),
-                ).lower()
-                last = re.sub(
-                    r"\W",
-                    "",
-                    fake.last_name(),
-                ).lower()
-                if separator:
-                    new_local = (
-                        first
-                        + separator
-                        + last
-                    )
-                else:
-                    new_local = (
-                        first[:1]
-                        + last
-                    )
-                if plus:
-                    new_local += "+" + tag
-                value = (
-                    new_local
-                    + "@"
-                    + fake.free_email_domain()
+            else:
+                local = (
+                    first[:1]
+                    + last
                 )
-                if value.casefold() != key:
-                    break
-                attempt += 1
-            self.cache["email"][key] = value
+            if plus:
+                local += "+" + tag
+            self.cache["email"][key] = (
+                local
+                + "@"
+                + fake.free_email_domain()
+            )
         value = self.cache["email"][key]
         if original.isupper():
             return value.upper()
@@ -339,37 +331,34 @@ class Anonymizer:
             original,
         )
         if key not in self.cache["phone"]:
-            attempt = 0
-            while True:
-                fake = self.fake(
-                    "phone",
-                    f"{key}|{attempt}",
+            fake = self.fake(
+                "phone",
+                key,
+            )
+            if (
+                len(key) == 11
+                and key.startswith("1")
+            ):
+                digits = ["1"]
+            else:
+                digits = []
+            while len(digits) < len(key):
+                digit = str(
+                    fake.random_int(
+                        0,
+                        9,
+                    )
                 )
                 if (
-                    len(key) == 11
-                    and key.startswith("1")
+                    len(digits) in (0, 3)
+                    and digit in ("0", "1")
                 ):
-                    digits = ["1"]
-                else:
-                    digits = []
-                while len(digits) < len(key):
-                    digit = str(
-                        fake.random_int(
-                            0,
-                            9,
-                        )
-                    )
-                    if (
-                        len(digits) in (0, 3)
-                        and digit in ("0", "1")
-                    ):
-                        continue
-                    digits.append(digit)
-                replacement = "".join(digits)
-                if replacement != key:
-                    break
-                attempt += 1
-            self.cache["phone"][key] = replacement
+                    continue
+                digits.append(digit)
+            self.cache["phone"][key] = "".join(
+                digits
+            )
+
         digits = iter(
             self.cache["phone"][key]
         )
@@ -391,65 +380,114 @@ class Anonymizer:
                 attempt += 1
             self.cache[category][key] = replacement
         return same_case(original, self.cache[category][key])
+        key = normalized(original)
+
+        if key not in self.cache[category]:
+            fake = self.fake(
+                category,
+                key,
+            )
+
+            self.cache[category][key] = getattr(
+                fake,
+                faker_method,
+            )()
+
+        return same_case(
+            original,
+            self.cache[category][key],
+        )
+
     def street(self, value):
         return self.component(
             "street",
             value,
             "street_address",
         )
+
     def city(self, value):
         return self.component(
             "city",
             value,
             "city",
         )
+
     def state(self, value):
         return self.component(
             "state",
             value,
             "state_abbr",
         )
+
     def zipcode(self, value):
         key = value
+
         if key not in self.cache["zip"]:
-            attempt = 0
-            while True:
-                fake = self.fake("zip", f"{key}|{attempt}")
-                if "-" in value:
-                    replacement = fake.zipcode_plus4()
-                else:
-                    replacement = fake.zipcode()
-                if replacement != value:
-                    break
-                attempt += 1
+            fake = self.fake(
+                "zip",
+                key,
+            )
+
+            if "-" in value:
+                replacement = fake.zipcode_plus4()
+            else:
+                replacement = fake.zipcode()
+
             self.cache["zip"][key] = replacement
+
         return self.cache["zip"][key]
+
     def address(self, value):
         parts = split_address(value)
+
         if not parts:
             return None
+
         street, city, state, zipcode = parts
+
         return (
             f"{self.street(street)}, "
             f"{self.city(city)}, "
             f"{self.state(state)} "
             f"{self.zipcode(zipcode)}"
         )
-    def replace(self, table, column, data_type, value):
+
+    def replace(
+        self,
+        table,
+        column,
+        data_type,
+        value,
+    ):
         column = column.lower()
-        location = f"{table.lower()}.{column}"
+        location = (
+            f"{table.lower()}.{column}"
+        )
+
         if location in SKIP:
             return None
-        if "email" in column and valid_email(value):
+
+        if (
+            "email" in column
+            and valid_email(value)
+        ):
             return self.email(value)
-        if "phone" in column and valid_phone(value):
+
+        if (
+            "phone" in column
+            and valid_phone(value)
+        ):
             return self.phone(value)
+
         if "address" in column:
             full = self.address(value)
+
             if full:
                 return full
+
             if valid_street(value):
                 return self.street(value)
+
         if (
             column == "city"
             and re.fullmatch(
@@ -458,6 +496,7 @@ class Anonymizer:
             )
         ):
             return self.city(value)
+
         if (
             column == "state"
             and re.fullmatch(
@@ -466,8 +505,10 @@ class Anonymizer:
             )
         ):
             return self.state(value)
+
         if (
-            column in {
+            column
+            in {
                 "zip",
                 "zipcode",
                 "zip_code",
@@ -478,16 +519,21 @@ class Anonymizer:
             )
         ):
             return self.zipcode(value)
+
         if (
             column.endswith("name")
             and valid_name(value)
         ):
             return self.name(value)
+
         return None
 def anonymize(sql):
     schema = parse_schema(sql)
+
     anonymizer = Anonymizer()
+
     replacements = []
+
     for literal in parse_literals(
         sql,
         schema,
@@ -500,12 +546,14 @@ def anonymize(sql):
             data_type,
             value,
         ) = literal
+
         replacement = anonymizer.replace(
             table,
             column,
             data_type,
             value,
         )
+
         if replacement is not None:
             replacements.append(
                 (
@@ -514,15 +562,18 @@ def anonymize(sql):
                     quote(replacement),
                 )
             )
+
     output = []
     last = 0
     for start, end, replacement in replacements:
         output.append(
             sql[last:start]
         )
+
         output.append(
             replacement
         )
+
         last = end
     output.append(
         sql[last:]
@@ -530,9 +581,14 @@ def anonymize(sql):
     return "".join(output)
 def main():
     parser = argparse.ArgumentParser(
-        description="anonymize PII in a MySQL sql export"
+        description=(
+            "anonymize PII in a "
+            "MySQL sql export"
+        )
     )
-    parser.add_argument("input")
+    parser.add_argument(
+        "input"
+    )
     parser.add_argument(
         "-o",
         "--output",
@@ -552,6 +608,8 @@ def main():
         encoding="utf-8",
     ) as file:
         file.write(output)
-    print(f"wrote {args.output}")
+    print(
+        f"wrote {args.output}"
+    )
 if __name__ == "__main__":
     main()
