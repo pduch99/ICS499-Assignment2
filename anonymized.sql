@@ -37,25 +37,25 @@ CREATE TABLE `venues` (
   PRIMARY KEY (`venue_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 INSERT INTO `players` (`player_id`, `full_name`, `email`, `phone`, `address_line1`, `city`, `state`, `zip`, `jersey_number`, `position`) VALUES
-(1,'Ronald Brown','charles.freeman@hotmail.com','746-860-3123','8261 Livingston Branch Apt. 601','Brewerburgh','ID','76884',7,'Attack'),
-(2,'Haley Graves','dennis.morgan@yahoo.com','(838) 984-0825','96137 David Greens Suite 407','Brewerburgh','ID','76884',22,'Midfield'),
-(3,'David Waters','brian.robles+lax@yahoo.com','677.248.5275','9136 Clark Roads Apt. 802','Brewerburgh','ID','71809',14,'Defense'),
-(4,'ANTHONY FISHER','KBEARD@HOTMAIL.COM','8084039012','526 Wesley Land Apt. 220','Brewerburgh','ID','76884',31,'Goalie'),
-(5,'Linda Bernard Jr.','sharon.west@gmail.com','859-854-9508','0363 Hahn Shores','Brewerburgh','ID','76884',9,'Midfield'),
-(6,'Patrick Osborne','samantha.mckinney@yahoo.com',NULL,'2354 Carter Village','Brewerburgh','ID','71809',18,'Attack');
+(1,'Chase Martinez','michael.guzman@yahoo.com','605-960-3410','26710 Chaney Shoals Suite 431','Harperport','LA','13323',7,'Attack'),
+(2,'Maria Rogers','john.fox@hotmail.com','(932) 758-9395','450 Whitney Haven Apt. 641','Harperport','LA','13323',22,'Midfield'),
+(3,'Eileen Anderson','cody.sims+lax@hotmail.com','526.372.9561','6411 Roger Valley','Harperport','LA','25775',14,'Defense'),
+(4,'DAVID JONES','LHALL@YAHOO.COM','6886296991','94705 Jennifer Island','Harperport','LA','13323',31,'Goalie'),
+(5,'Christopher Carr Jr.','margaret.martin@gmail.com','718-951-4346','248 Stephens River','Harperport','LA','13323',9,'Midfield'),
+(6,'Russell Cook','anthony.harvey@gmail.com',NULL,'7221 Coleman Lane Apt. 981','Harperport','LA','25775',18,'Attack');
 
 INSERT INTO `guardians` (`guardian_id`, `player_id`, `contact_name`, `contact_email`, `contact_phone`, `relationship`) VALUES
-(101,1,'Keith Clark','meagan.olsen@gmail.com','572-291-9631','mother'),
-(102,2,'Jessica Hebert','donald.holloway@gmail.com','(847) 424-6197','father'),
-(103,3,'Chloe Rose','mariah.miller@gmail.com','510-205-9007','mother'),
-(104,1,'Keith Clark','meagan.olsen@gmail.com','572-291-9631','guardian'),
-(105,6,'Patrick Osborne','samantha.mckinney@yahoo.com','627-864-8316','self');
+(101,1,'Christina Hunter','juan.jones@hotmail.com','732-556-2022','mother'),
+(102,2,'Natalie Miller','paul.gilmore@hotmail.com','(237) 901-1486','father'),
+(103,3,'Desiree Martinez','michael.white@gmail.com','824-463-2004','mother'),
+(104,1,'Christina Hunter','juan.jones@hotmail.com','732-556-2022','guardian'),
+(105,6,'Russell Cook','anthony.harvey@gmail.com','896-723-3412','self');
 
 INSERT INTO `away_trips` VALUES
-(9001,1,'Ronald Brown','8261 Livingston Branch Apt. 601, Brewerburgh, ID 76884','2024-04-13'),
-(9002,2,'Haley Graves','96137 David Greens Suite 407, Brewerburgh, ID 76884','2024-04-13'),
-(9003,4,'ANTHONY FISHER','526 Wesley Land Apt. 220, Brewerburgh, ID 76884','2024-04-20'),
-(9004,1,'Ronald Brown','8261 Livingston Branch Apt. 601, Brewerburgh, ID 76884','2024-05-04');
+(9001,1,'Chase Martinez','26710 Chaney Shoals Suite 431, Harperport, LA 13323','2024-04-13'),
+(9002,2,'Maria Rogers','450 Whitney Haven Apt. 641, Harperport, LA 13323','2024-04-13'),
+(9003,4,'DAVID JONES','94705 Jennifer Island, Harperport, LA 13323','2024-04-20'),
+(9004,1,'Chase Martinez','26710 Chaney Shoals Suite 431, Harperport, LA 13323','2024-05-04');
 
 INSERT INTO `venues` (`venue_id`, `name`, `field_surface`) VALUES
 (1,'Bielenberg Sports Center','Turf'),
